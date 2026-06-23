@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nus_local_password}
+      POSTGRES_DB: ${POSTGRES_DB:-nus_express_template}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-nus} -d ${POSTGRES_DB:-nus_express_template}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:5
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+
+  api:
+    build:
+      context: .
+      target: development
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "yarn prisma generate &&
+             yarn prisma migrate deploy &&
+             yarn dev"
+    environment:
+      NODE_ENV: development
+      PORT: ${PORT:-4000}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nus}:${POSTGRES_PASSWORD:-nus_local_password}@db:5432/${POSTGRES_DB:-nus_express_template}
+      JWT_TOKEN_SECRET: ${JWT_TOKEN_SECRET:-local-development-secret}
+    ports:
+      - "${PORT:-4000}:${PORT:-4000}"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+
+volumes:
+  node_modules:
+  postgres_data:
