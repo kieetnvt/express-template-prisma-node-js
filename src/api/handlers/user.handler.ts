@@ -5,6 +5,12 @@ const getOne = async (id: number) => {
   return user;
 }
 
+const update = async (id: number, payload: { name?: string; email?: string; address?: string }) => {
+  const user = await UserRepository.update(id, payload);
+  return user;
+}
+
 export default {
-  getOne
+  getOne,
+  update
 }

@@ -49,8 +49,18 @@ const findOneByEmail = async (email: string, options: { excludeSensitiveFields: 
   return record;
 }
 
+const update = async (id: number, payload: Prisma.UserUpdateInput) => {
+  const record = await prisma.user.update({
+    where: { id },
+    data: payload,
+  });
+
+  return exclude(record, ['password']);
+}
+
 export default {
   create,
   findOne,
-  findOneByEmail
+  findOneByEmail,
+  update
 }

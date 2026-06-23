@@ -21,4 +21,18 @@ router.get('/:id', auth, async (
   }
 })
 
+router.put('/profile', auth, async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, email, address } = req.body;
+    const user = await UserHandler.update(req.userId!, { name, email, address });
+    return successResponse(res, { user });
+  } catch (err: unknown) {
+    next(err);
+  }
+})
+
 export default router;
