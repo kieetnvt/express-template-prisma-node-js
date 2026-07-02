@@ -28,6 +28,10 @@ class Api implements ApiInterface {
     );
     app.use('/api/v1', routes);
 
+    app.get('/health', (_req: Request, res: Response) => {
+      res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    });
+
     app.get('/', (_req: Request, res: Response) => {
       res.send('Welcome to NUS express application!');
     });

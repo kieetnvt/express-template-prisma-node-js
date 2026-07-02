@@ -4,6 +4,7 @@
 dist
 dockerdb
 node_modules
+src/generated
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
