@@ -2,6 +2,7 @@ import { NextFunction, Router, Request, Response } from 'express';
 import CommentHandler from '../handlers/comment.handler.js';
 import { successResponse } from './response.js';
 import { auth } from '../middlewares/auth.middleware.js';
+import { createCommentSchema } from './validators/comment.validator.js';
 
 const router = Router();
 
@@ -24,7 +25,8 @@ router.post('/', auth, async (
   next: NextFunction
 ) => {
   try {
-    const { content, postId } = req.body;
+    const validBody = await createCommentSchema.validateAsync(req.body);
+    const { content, postId } = validBody;
     const comment = await CommentHandler.createComment(req.userId!, postId, content);
     return successResponse(res, { comment });
   } catch (error: unknown) {
