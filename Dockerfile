@@ -17,6 +17,8 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN yarn prisma generate
 RUN yarn build
 
+RUN cp -r src/generated/prisma dist/generated/prisma
+
 FROM node:22-alpine AS production
 
 WORKDIR /app
@@ -26,6 +28,9 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production --ignore-scripts
 
 COPY --from=build /app/dist ./dist
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4000/health', r => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"
 
 EXPOSE 4000
 
