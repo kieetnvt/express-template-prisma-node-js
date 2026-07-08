@@ -2,6 +2,7 @@ import { NextFunction, Router, Request, Response } from 'express';
 import PostHandler from '../handlers/post.handler.js';
 import { successResponse } from './response.js';
 import { auth } from '../middlewares/auth.middleware.js';
+import { createPostSchema } from './validators/post.validator.js';
 
 const router = Router();
 
@@ -24,7 +25,8 @@ router.post('/', auth, async (
   next: NextFunction
 ) => {
   try {
-    const { title, content } = req.body;
+    const validBody = await createPostSchema.validateAsync(req.body);
+    const { title, content } = validBody;
     const post = await PostHandler.createPost(req.userId!, title, content);
     return successResponse(res, { post });
   } catch (error: unknown) {
