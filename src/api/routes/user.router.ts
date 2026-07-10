@@ -1,45 +1,31 @@
-import { NextFunction, Router, Request, Response } from 'express';
-import UserHandler from '../handlers/user.handler.js';
-import { successResponse } from './response.js';
+import { Router } from 'express';
+
+import UserController from '../controllers/user.controller.js';
 import { auth } from '../middlewares/auth.middleware.js';
-import { updateProfileSchema } from './validators/user.validator.js';
-import { AppError } from '../errors/app.error.js';
+import { asyncHandler } from '../middlewares/async-handler.middleware.js';
+import {
+  validateBody,
+  validateParams,
+} from '../middlewares/validation.middleware.js';
+import {
+  updateProfileSchema,
+  userIdParamsSchema,
+} from './validators/user.validator.js';
 
 const router = Router();
 
-router.get('/:id', auth, async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const mID = id === 'me' ? req.userId! : parseInt(id, 10);
+router.get(
+  '/:id',
+  auth,
+  validateParams(userIdParamsSchema),
+  asyncHandler(UserController.getOne)
+);
 
-    if (id !== 'me' && isNaN(mID)) {
-      throw new AppError('Invalid user ID', 400);
-    }
-
-    const user = await UserHandler.getOne(mID);
-    return successResponse(res, { user });
-  } catch (err: unknown) {
-    next(err);
-  }
-})
-
-router.put('/profile', auth, async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const validBody = await updateProfileSchema.validateAsync(req.body);
-    const { name, email, address } = validBody;
-    const user = await UserHandler.update(req.userId!, { name, email, address });
-    return successResponse(res, { user });
-  } catch (err: unknown) {
-    next(err);
-  }
-})
+router.put(
+  '/profile',
+  auth,
+  validateBody(updateProfileSchema),
+  asyncHandler(UserController.updateProfile)
+);
 
 export default router;
