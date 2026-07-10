@@ -32,7 +32,7 @@
 - Consumes: Express `RequestHandler`, Joi `ObjectSchema`, and existing `AppError`.
 - Produces: `asyncHandler(handler)`, `validateBody(schema)`, `validateParams(schema)`, and `userIdParamsSchema` for later route tasks.
 
-- [ ] **Step 1: Add the asynchronous controller wrapper**
+- [x] **Step 1: Add the asynchronous controller wrapper**
 
 Create `src/api/middlewares/async-handler.middleware.ts`:
 
@@ -52,7 +52,7 @@ export const asyncHandler = (handler: AsyncRequestHandler): RequestHandler => {
 };
 ```
 
-- [ ] **Step 2: Add request validation middleware**
+- [x] **Step 2: Add request validation middleware**
 
 Create `src/api/middlewares/validation.middleware.ts`:
 
@@ -96,7 +96,7 @@ export const validateParams = (schema: Joi.ObjectSchema): RequestHandler => {
 };
 ```
 
-- [ ] **Step 3: Add the user-ID path schema**
+- [x] **Step 3: Add the user-ID path schema**
 
 Update `src/api/routes/validators/user.validator.ts` to:
 
@@ -114,13 +114,13 @@ export const updateProfileSchema = Joi.object({
 }).min(1);
 ```
 
-- [ ] **Step 4: Verify the shared middleware compiles**
+- [x] **Step 4: Verify the shared middleware compiles**
 
 Run: `yarn build`
 
 Expected: exit code `0` with no TypeScript errors.
 
-- [ ] **Step 5: Commit the shared middleware**
+- [x] **Step 5: Commit the shared middleware**
 
 ```bash
 git add src/api/middlewares/async-handler.middleware.ts src/api/middlewares/validation.middleware.ts src/api/routes/validators/user.validator.ts
@@ -139,7 +139,7 @@ git commit -m "refactor: add request pipeline middleware"
 - Consumes: Existing repository exports, Prisma input types, auth configuration, bcrypt, and JWT.
 - Produces: `AuthService`, `UserService`, `PostService`, and `CommentService` with the same operation signatures as the current handlers.
 
-- [ ] **Step 1: Add the authentication service**
+- [x] **Step 1: Add the authentication service**
 
 Create `src/api/services/auth.service.ts`:
 
@@ -194,7 +194,7 @@ export default {
 };
 ```
 
-- [ ] **Step 2: Add the user service**
+- [x] **Step 2: Add the user service**
 
 Create `src/api/services/user.service.ts`:
 
@@ -218,7 +218,7 @@ export default {
 };
 ```
 
-- [ ] **Step 3: Add the post service**
+- [x] **Step 3: Add the post service**
 
 Create `src/api/services/post.service.ts`:
 
@@ -247,7 +247,7 @@ export default {
 };
 ```
 
-- [ ] **Step 4: Add the comment service**
+- [x] **Step 4: Add the comment service**
 
 Create `src/api/services/comment.service.ts`:
 
@@ -276,7 +276,7 @@ export default {
 };
 ```
 
-- [ ] **Step 5: Verify the services compile without Express dependencies**
+- [x] **Step 5: Verify the services compile without Express dependencies**
 
 Run: `yarn build`
 
@@ -286,7 +286,7 @@ Run: `rg -n "from 'express'|from \"express\"" src/api/services`
 
 Expected: no output and exit code `1`, proving the services do not import Express.
 
-- [ ] **Step 6: Commit the services**
+- [x] **Step 6: Commit the services**
 
 ```bash
 git add src/api/services/auth.service.ts src/api/services/user.service.ts src/api/services/post.service.ts src/api/services/comment.service.ts
@@ -305,7 +305,7 @@ git commit -m "refactor: expose application services"
 - Consumes: The four service default exports from Task 2 and `successResponse(res, data)`.
 - Produces: Async controller operations for all eight endpoints, compatible with `asyncHandler` from Task 1.
 
-- [ ] **Step 1: Add the authentication controller**
+- [x] **Step 1: Add the authentication controller**
 
 Create `src/api/controllers/auth.controller.ts`:
 
@@ -334,7 +334,7 @@ export default {
 };
 ```
 
-- [ ] **Step 2: Add the user controller**
+- [x] **Step 2: Add the user controller**
 
 Create `src/api/controllers/user.controller.ts`:
 
@@ -365,7 +365,7 @@ export default {
 };
 ```
 
-- [ ] **Step 3: Add the post controller**
+- [x] **Step 3: Add the post controller**
 
 Create `src/api/controllers/post.controller.ts`:
 
@@ -394,7 +394,7 @@ export default {
 };
 ```
 
-- [ ] **Step 4: Add the comment controller**
+- [x] **Step 4: Add the comment controller**
 
 Create `src/api/controllers/comment.controller.ts`:
 
@@ -427,7 +427,7 @@ export default {
 };
 ```
 
-- [ ] **Step 5: Verify controllers compile and respect the repository boundary**
+- [x] **Step 5: Verify controllers compile and respect the repository boundary**
 
 Run: `yarn build`
 
@@ -437,7 +437,7 @@ Run: `rg -n "repositories|generated/prisma|PrismaClient" src/api/controllers`
 
 Expected: no output and exit code `1`, proving controllers do not access repositories or Prisma.
 
-- [ ] **Step 6: Commit the controllers**
+- [x] **Step 6: Commit the controllers**
 
 ```bash
 git add src/api/controllers/auth.controller.ts src/api/controllers/user.controller.ts src/api/controllers/post.controller.ts src/api/controllers/comment.controller.ts
@@ -456,7 +456,7 @@ git commit -m "refactor: add API controllers"
 - Consumes: Controllers from Task 3; `asyncHandler`, `validateBody`, and `validateParams` from Task 1; existing `auth` and Joi schemas.
 - Produces: Eight routes containing only path declarations and middleware/controller composition.
 
-- [ ] **Step 1: Refactor authentication routes**
+- [x] **Step 1: Refactor authentication routes**
 
 Replace `src/api/routes/auth.router.ts` with:
 
@@ -485,7 +485,7 @@ router.post(
 export default router;
 ```
 
-- [ ] **Step 2: Refactor user routes**
+- [x] **Step 2: Refactor user routes**
 
 Replace `src/api/routes/user.router.ts` with:
 
@@ -523,7 +523,7 @@ router.put(
 export default router;
 ```
 
-- [ ] **Step 3: Refactor post routes**
+- [x] **Step 3: Refactor post routes**
 
 Replace `src/api/routes/post.router.ts` with:
 
@@ -550,7 +550,7 @@ router.post(
 export default router;
 ```
 
-- [ ] **Step 4: Refactor comment routes**
+- [x] **Step 4: Refactor comment routes**
 
 Replace `src/api/routes/comment.router.ts` with:
 
@@ -577,7 +577,7 @@ router.post(
 export default router;
 ```
 
-- [ ] **Step 5: Verify routes compile and contain only pipeline composition**
+- [x] **Step 5: Verify routes compile and contain only pipeline composition**
 
 Run: `yarn build`
 
@@ -591,7 +591,7 @@ Run: `rg -n "asyncHandler" src/api/routes/*.router.ts`
 
 Expected: four route files and eight controller bindings are reported.
 
-- [ ] **Step 6: Commit the declarative routes**
+- [x] **Step 6: Commit the declarative routes**
 
 ```bash
 git add src/api/routes/auth.router.ts src/api/routes/user.router.ts src/api/routes/post.router.ts src/api/routes/comment.router.ts
@@ -610,7 +610,7 @@ git commit -m "refactor: compose routes from middleware and controllers"
 - Consumes: The completed route, controller, service, middleware, and repository layers.
 - Produces: A source tree with one implementation of each business operation and no obsolete handler layer.
 
-- [ ] **Step 1: Delete all four obsolete handler files**
+- [x] **Step 1: Delete all four obsolete handler files**
 
 Delete these exact files with `apply_patch`:
 
@@ -621,13 +621,13 @@ src/api/handlers/post.handler.ts
 src/api/handlers/comment.handler.ts
 ```
 
-- [ ] **Step 2: Confirm no source import references the old layer**
+- [x] **Step 2: Confirm no source import references the old layer**
 
 Run: `rg -n "api/handlers|handlers/|Handler" src --glob '*.ts'`
 
 Expected: no output and exit code `1`.
 
-- [ ] **Step 3: Audit dependency boundaries**
+- [x] **Step 3: Audit dependency boundaries**
 
 Run: `rg -n "repositories|generated/prisma|PrismaClient" src/api/controllers`
 
@@ -645,13 +645,13 @@ Run: `rg -n "PrismaClient|generated/prisma" src/api src/prisma --glob '*.ts'`
 
 Expected: Prisma access appears only in `src/prisma/repositories/*.repository.ts`; Prisma input types may also appear in `src/api/services/auth.service.ts`.
 
-- [ ] **Step 4: Audit all public route contracts**
+- [x] **Step 4: Audit all public route contracts**
 
 Run: `rg -n "router\\.(get|post|put)" src/api/routes/{auth,user,post,comment}.router.ts`
 
 Expected: eight declarations corresponding to sign-up, login, get user, update profile, list posts, create post, list comments, and create comment. Confirm their router mount prefixes remain unchanged in `src/api/routes/index.ts`.
 
-- [ ] **Step 5: Run full lint and TypeScript verification**
+- [x] **Step 5: Run full lint and TypeScript verification**
 
 Run: `yarn lint`
 
@@ -665,14 +665,14 @@ Run: `git diff --check`
 
 Expected: exit code `0` with no whitespace errors.
 
-- [ ] **Step 6: Commit handler removal**
+- [x] **Step 6: Commit handler removal**
 
 ```bash
 git add src/api/handlers/auth.handler.ts src/api/handlers/user.handler.ts src/api/handlers/post.handler.ts src/api/handlers/comment.handler.ts
 git commit -m "refactor: remove obsolete handler layer"
 ```
 
-- [ ] **Step 7: Perform final requirement-by-requirement review**
+- [x] **Step 7: Perform final requirement-by-requirement review**
 
 Run: `git diff --check HEAD~5..HEAD`
 
@@ -682,13 +682,13 @@ Compare the current source tree with
 `docs/superpowers/specs/2026-07-10-layered-request-flow-design.md` and confirm:
 
 ```txt
-[ ] All eight endpoints use asyncHandler-wrapped controllers.
-[ ] All request bodies and the user-ID path parameter validate before controllers.
-[ ] Controllers only translate HTTP input/output and call services.
-[ ] Services contain business logic and have no Express imports.
-[ ] Repositories remain the only direct Prisma query layer.
-[ ] Successful endpoint paths and response envelopes are unchanged.
-[ ] Validation errors are AppError instances with status 400.
-[ ] No obsolete handler files or imports remain.
-[ ] yarn lint and yarn build both exit successfully.
+[x] All eight endpoints use asyncHandler-wrapped controllers.
+[x] All request bodies and the user-ID path parameter validate before controllers.
+[x] Controllers only translate HTTP input/output and call services.
+[x] Services contain business logic and have no Express imports.
+[x] Repositories remain the only direct Prisma query layer.
+[x] Successful endpoint paths and response envelopes are unchanged.
+[x] Validation errors are AppError instances with status 400.
+[x] No obsolete handler files or imports remain.
+[x] yarn lint and yarn build both exit successfully.
 ```
