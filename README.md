@@ -144,6 +144,7 @@ When the API runs inside Compose, its database host is `db`. When it runs direct
 | `yarn db:generate` | Generate Prisma Client from the schema |
 | `yarn db:migrate` | Create/apply development migrations |
 | `yarn db:migrate-prod` | Apply committed migrations without creating new ones |
+| `yarn db:seed` | Run seed scripts from `src/prisma/seeds/` |
 
 Run the compiled application with:
 
@@ -208,6 +209,22 @@ An authenticated request may also retrieve a user by numeric ID:
 GET /api/v1/users/1
 Authorization: Bearer <token>
 ```
+
+### Available endpoints
+
+| Method | Path | Authentication | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/auth/sign-up` | No | Create an account |
+| `POST` | `/api/v1/auth/login` | No | Return a one-day JWT |
+| `GET` | `/api/v1/users/:id` | Bearer token | Get a user by numeric ID or `me` |
+| `PUT` | `/api/v1/users/profile` | Bearer token | Update the authenticated user's name, email, or address |
+| `GET` | `/api/v1/posts` | Bearer token | List posts owned by the authenticated user |
+| `POST` | `/api/v1/posts` | Bearer token | Create a post owned by the authenticated user |
+| `GET` | `/api/v1/comments` | Bearer token | List comments owned by the authenticated user |
+| `POST` | `/api/v1/comments` | Bearer token | Create a comment on a post |
+| `GET` | `/health` | No | Return service health and the current timestamp |
+
+See `/api-docs` for request schemas and interactive examples.
 
 Successful responses use:
 
@@ -281,7 +298,11 @@ Express router
     |-- validate request with Joi
     |-- authenticate with middleware when required
     v
-Handler
+Controller
+    |-- translate HTTP input and output
+    |-- call the relevant service
+    v
+Service
     |-- execute application logic
     |-- hash passwords or create JWTs
     v
@@ -302,8 +323,9 @@ PostgreSQL
 │   ├── api
 │   │   ├── index.ts                 # Express application and global middleware
 │   │   ├── docs                     # OpenAPI specification used by Swagger UI
-│   │   ├── routes                   # Route definitions, validation, and HTTP responses
-│   │   ├── handlers                 # Application/use-case logic
+│   │   ├── routes                   # Route definitions, validators, and response helpers
+│   │   ├── controllers              # HTTP input/output orchestration
+│   │   ├── services                 # Business and application logic
 │   │   ├── errors                   # Application errors with HTTP status codes
 │   │   └── middlewares              # Cross-cutting request middleware
 │   ├── config
@@ -327,13 +349,14 @@ For `GET /api/v1/users/me`:
 2. Request logging middleware creates or accepts a request ID and starts timing.
 3. `src/api/routes/index.ts` routes `/users` to `user.router.ts`.
 4. `auth.middleware.ts` reads the bearer token, verifies it, and sets `req.userId`.
-5. `user.router.ts` converts `me` to the authenticated user ID.
-6. `user.handler.ts` coordinates the use case.
-7. `user.repository.ts` queries PostgreSQL through Prisma and removes the password.
-8. `response.ts` produces the JSON HTTP response.
-9. Winston records the completed request. Errors are passed to centralized error middleware and logged once.
+5. `user.router.ts` validates the path parameter and dispatches the request to the controller.
+6. `user.controller.ts` converts `me` to the authenticated user ID, calls the service, and selects the response shape.
+7. `user.service.ts` coordinates the use case.
+8. `user.repository.ts` queries PostgreSQL through Prisma and removes the password.
+9. `response.ts` produces the JSON HTTP response.
+10. Winston records the completed request. Errors are passed to centralized error middleware and logged once.
 
-For authentication requests, the route first validates the body with Joi. The handler hashes passwords during sign-up and signs JWTs during login.
+For authentication requests, the route first validates the body with Joi. The authentication service hashes passwords during sign-up and signs JWTs during login.
 
 ## Coding pattern
 
@@ -342,10 +365,11 @@ Follow the existing responsibilities when adding a feature:
 1. Define or update database models in `src/prisma/schema.prisma`.
 2. Create a migration and regenerate Prisma Client.
 3. Put database queries in a repository under `src/prisma/repositories`.
-4. Put business/application logic in a handler under `src/api/handlers`.
-5. Put request parsing, validation, middleware composition, and response selection in a router.
-6. Mount the router in `src/api/routes/index.ts`.
-7. Run lint and build before committing.
+4. Put business/application logic in a service under `src/api/services`.
+5. Put HTTP request and response orchestration in a controller under `src/api/controllers`.
+6. Put validation and middleware composition in a router.
+7. Mount the router in `src/api/routes/index.ts`.
+8. Run lint and build before committing.
 
 Example:
 
@@ -360,9 +384,10 @@ Project conventions:
 
 - Use ESM imports. Relative TypeScript imports include the emitted `.js` extension.
 - Routers should remain thin and HTTP-focused.
-- Handlers should not contain raw database queries.
+- Controllers should translate HTTP input/output and delegate application logic to services.
+- Services should not contain raw database queries.
 - Repositories should not decide HTTP status codes or send responses.
-- Validate untrusted request input before calling handlers.
+- Validate untrusted request input before calling controllers.
 - Never return password hashes or include them in JWT payloads.
 - Add authenticated routes behind `auth`.
 - Treat generated Prisma files as build artifacts; change the schema and regenerate instead of editing them.
@@ -409,7 +434,7 @@ For production:
 3. Run `yarn prisma migrate deploy` from CI or a release job that installs development dependencies.
 4. Start the image with its default `node dist/index.js` command.
 5. Terminate HTTPS at the platform load balancer or ingress.
-6. Add health/readiness endpoints before enabling automated health checks.
+6. Use the existing `/health` endpoint for automated container or platform health checks.
 7. Send logs to the platform's log system and do not expose Adminer publicly.
 
 Build the production image locally:
