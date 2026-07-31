@@ -14,7 +14,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*.js"]
     }
   },
   "include": [
@@ -23,9 +23,5 @@
   "exclude": [
     "node_modules"
   ],
-  "files": ["src/custom.d.ts"],
-  "tsc-alias": {
-    "resolveFullPaths": true,
-    "resolveFullExtension": ".js"
-  }
+  "files": ["src/custom.d.ts"]
 }

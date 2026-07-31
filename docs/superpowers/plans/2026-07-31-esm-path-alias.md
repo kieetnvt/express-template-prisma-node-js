@@ -5,10 +5,10 @@
 **Goal:** Make every project-owned source import use `@/` without a `.js`
 suffix while keeping ESM development and plain-Node production execution.
 
-**Architecture:** TypeScript and `tsx` resolve `@/*` to `src/*` while working
-with source files. After `tsc` emits ESM, `tsc-alias` rewrites aliases to
-relative paths and appends `.js`, so the existing `node dist/index.js`
-production entrypoint needs no runtime loader.
+**Architecture:** TypeScript and `tsx` resolve `@/*` through the NodeNext-aware
+`src/*.js` substitution while working with source files. After `tsc` emits
+ESM, `tsc-alias` rewrites aliases to relative paths and appends `.js`, so the
+existing `node dist/index.js` production entrypoint needs no runtime loader.
 
 **Tech Stack:** Node.js 22, TypeScript 5.8, ESM/NodeNext, tsx, tsc-alias, Yarn
 
@@ -40,7 +40,7 @@ production entrypoint needs no runtime loader.
 
 - Consumes: Existing `src/` source root, `tsx watch src/index.ts`, and
   `node dist/index.js` runtime.
-- Produces: The source alias `@/* -> src/*` and a build that emits
+- Produces: The source alias `@/* -> src/*.js` and a build that emits
   Node-compatible relative `.js` imports.
 
 - [ ] **Step 1: Verify the baseline project**
@@ -86,7 +86,7 @@ Change `tsconfig.json` to:
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*.js"]
     }
   },
   "include": [
@@ -95,11 +95,7 @@ Change `tsconfig.json` to:
   "exclude": [
     "node_modules"
   ],
-  "files": ["src/custom.d.ts"],
-  "tsc-alias": {
-    "resolveFullPaths": true,
-    "resolveFullExtension": ".js"
-  }
+  "files": ["src/custom.d.ts"]
 }
 ```
 
@@ -108,7 +104,7 @@ Change `tsconfig.json` to:
 Change the `build` script in `package.json` to:
 
 ```json
-"build": "tsc --build --clean && tsc && tsc-alias"
+"build": "tsc --build --clean && tsc && tsc-alias --resolve-full-paths --resolve-full-extension .js"
 ```
 
 - [ ] **Step 5: Confirm configuration alone still builds**
@@ -159,7 +155,7 @@ git commit -m "build: support ESM source aliases"
 
 **Interfaces:**
 
-- Consumes: The `@/* -> src/*` mapping from Task 1.
+- Consumes: The `@/* -> src/*.js` mapping from Task 1.
 - Produces: Source files whose project-owned imports consistently use `@/`
   without `.js`.
 

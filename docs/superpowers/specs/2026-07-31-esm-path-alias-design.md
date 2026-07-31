@@ -37,11 +37,15 @@ TypeScript will map the source alias from the project root:
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*.js"]
     }
   }
 }
 ```
+
+The `.js` suffix belongs to the TypeScript path substitution, not to source
+imports. Under NodeNext resolution, TypeScript maps the substituted `.js`
+specifier back to the corresponding `.ts` source file.
 
 The proposed CommonJS configuration will not be used because it conflicts
 with the existing ESM package and runtime.
@@ -52,7 +56,8 @@ Development continues to run through `tsx watch src/index.ts`. `tsx` uses the
 TypeScript path mapping while executing source files.
 
 TypeScript's `paths` option does not rewrite emitted JavaScript. The production
-build will therefore run `tsc-alias` after `tsc`. `tsc-alias` will:
+build will therefore run `tsc-alias` after `tsc`, with explicit ESM path and
+extension flags. `tsc-alias` will:
 
 1. Replace emitted `@/` specifiers with relative paths.
 2. Resolve incomplete ESM paths to `.js` files.

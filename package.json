@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc --build --clean && tsc && tsc-alias",
+    "build": "tsc --build --clean && tsc && tsc-alias --resolve-full-paths --resolve-full-extension .js",
     "lint": "eslint src/**/*.ts",
     "start": "yarn lint && yarn build && yarn dev",
     "dev": "tsx watch src/index.ts",
