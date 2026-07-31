@@ -1,20 +1,17 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "commonjs",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "ES2023",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "rootDir": "./src",
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*.js"]
+      "@/*": ["src/*"]
     }
   },
   "include": [
@@ -22,6 +19,5 @@
   ],
   "exclude": [
     "node_modules"
-  ],
-  "files": ["src/custom.d.ts"]
+  ]
 }

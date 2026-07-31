@@ -12,7 +12,7 @@ TypeScript REST API template using Express, Prisma ORM, PostgreSQL, Joi validati
 - JWT authentication
 - bcrypt password hashing
 - ESLint 10
-- Docker Compose and Adminer
+- Docker Compose
 
 ## Prerequisites
 
@@ -39,12 +39,12 @@ The application uses these variables:
 | `NODE_ENV` | Runtime environment | `development` |
 | `PORT` | HTTP server port | `4000` |
 | `LOG_LEVEL` | Minimum Winston log level | `debug` locally, `info` in production |
-| `DATABASE_URL` | Direct PostgreSQL connection used by Prisma Client and Prisma CLI | `postgresql://nus:nus_local_password@localhost:5432/nus_express_template` |
+| `DATABASE_URL` | Direct PostgreSQL connection used by Prisma Client and Prisma CLI | `postgresql://postgres:postgres@localhost:5432/nus_express_template` |
 | `JWT_TOKEN_SECRET` | Secret used to sign and verify access tokens | Use a long random value |
 
-The `POSTGRES_*`, `POSTGRES_PORT`, and `ADMINER_PORT` variables in `.env.example` are optional overrides for Docker Compose.
+Docker Compose requires `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`. `POSTGRES_PORT` is optional and defaults to `5432`. `docker-compose.yml` reads application variables from `.env`; `docker-compose.prod.yml` reads them from `.env.prod`.
 
-Do not commit `.env`. Use separate secrets for each deployed environment.
+Do not commit `.env` or `.env.prod`. Use separate secrets for each deployed environment.
 
 ## Start development on the host
 
@@ -57,23 +57,13 @@ yarn install
 
 ### 2. Start PostgreSQL
 
-Start only the database and Adminer:
+Start only PostgreSQL:
 
 ```bash
-docker compose -f docker-compose-local.yml up -d db adminer
+docker compose up -d db
 ```
 
-PostgreSQL is available at `localhost:5432`. Adminer is available at [http://localhost:8080](http://localhost:8080).
-
-Default Adminer connection values:
-
-| Field | Value |
-| --- | --- |
-| System | PostgreSQL |
-| Server | `db` when using Adminer in Compose |
-| Username | `nus` |
-| Password | `nus_local_password` |
-| Database | `nus_express_template` |
+PostgreSQL is available at `localhost:5432` by default. Its username, password, database name, and optional host port come from `.env`.
 
 ### 3. Generate Prisma Client and apply migrations
 
@@ -94,45 +84,92 @@ The API listens on [http://localhost:4000](http://localhost:4000) by default. So
 
 Interactive Swagger documentation is available at [http://localhost:4000/api-docs](http://localhost:4000/api-docs). The raw OpenAPI document is available at [http://localhost:4000/api-docs.json](http://localhost:4000/api-docs.json).
 
-## Start everything with Docker
+## Run development with Docker Compose
 
-Build and start the API, PostgreSQL, and Adminer:
+Build and start the API and PostgreSQL:
 
 ```bash
-docker compose -f docker-compose-local.yml up --build
+docker compose up --build
 ```
 
-The API container waits for PostgreSQL, generates Prisma Client, applies committed migrations, and starts the development watcher.
+The API container waits for PostgreSQL to become healthy. Its `yarn dev` command generates Prisma Client and starts the development watcher. Run database migrations explicitly when the schema changes.
 
 Run the stack in the background:
 
 ```bash
-docker compose -f docker-compose-local.yml up -d --build
+docker compose up -d --build
 ```
 
 Useful local Docker commands:
 
 ```bash
 # Follow API logs
-docker compose -f docker-compose-local.yml logs -f api
+docker compose logs -f api
 
 # Show service status
-docker compose -f docker-compose-local.yml ps
+docker compose ps
 
-# Run Prisma commands inside the API container
-docker compose -f docker-compose-local.yml exec api yarn prisma migrate dev --name describe_change
+# Create and apply a development migration
+docker compose exec api yarn db:migrate --name describe_change
 
 # Restart only the API
-docker compose -f docker-compose-local.yml restart api
+docker compose restart api
 
 # Stop containers but retain database data
-docker compose -f docker-compose-local.yml down
+docker compose down
 
-# Stop containers and delete local database data
-docker compose -f docker-compose-local.yml down -v
+# Stop containers and delete disposable local database data
+docker compose down -v
 ```
 
 When the API runs inside Compose, its database host is `db`. When it runs directly on your machine, its database host is `localhost`.
+
+The `POSTGRES_*` values initialize PostgreSQL only when the `postgres_data` volume is created. Changing those values later does not rename roles or databases in an existing volume. Use `docker compose down -v` only when deleting the local database is intentional.
+
+## Run production with Docker Compose
+
+Create a production environment file:
+
+```bash
+cp .env.example .env.prod
+```
+
+Set `NODE_ENV=production`, strong token secrets, and production PostgreSQL credentials in `.env.prod`. Keep this file out of version control.
+
+Build and start the production API and PostgreSQL under an isolated Compose project:
+
+```bash
+docker compose -p express-template-prod \
+  --env-file .env.prod \
+  -f docker-compose.prod.yml \
+  up -d --build
+```
+
+The explicit project name keeps production container and volume names separate from development. If both stacks run on the same host, also assign different `PORT` and `POSTGRES_PORT` values to avoid host-port conflicts.
+
+`Dockerfile.prod` generates Prisma Client and compiles TypeScript while building the image. When the container starts, it applies committed migrations with `yarn db:migrate-prod` and then starts the compiled API with `yarn start`.
+
+Useful production Docker commands:
+
+```bash
+# Follow API logs
+docker compose -p express-template-prod \
+  --env-file .env.prod \
+  -f docker-compose.prod.yml \
+  logs -f api
+
+# Show service status
+docker compose -p express-template-prod \
+  --env-file .env.prod \
+  -f docker-compose.prod.yml \
+  ps
+
+# Stop containers but retain production database data
+docker compose -p express-template-prod \
+  --env-file .env.prod \
+  -f docker-compose.prod.yml \
+  down
+```
 
 ## Package commands
 
@@ -337,8 +374,10 @@ PostgreSQL
 │   │   ├── migrations               # Versioned database migrations
 │   │   └── repositories             # Database access
 │   └── generated/prisma             # Generated Prisma Client; do not edit manually
-├── Dockerfile
-└── docker-compose-local.yml
+├── Dockerfile                         # Development API image
+├── Dockerfile.prod                    # Production API image
+├── docker-compose.yml                 # Development API and PostgreSQL
+└── docker-compose.prod.yml            # Production API and PostgreSQL
 ```
 
 ### Request lifecycle
@@ -429,18 +468,18 @@ Suitable deployment options include Render, Railway, Fly.io, Google Cloud Run, A
 
 For production:
 
-1. Build the `production` target from `Dockerfile`.
+1. Build the image from `Dockerfile.prod`.
 2. Provide `DATABASE_URL`, `JWT_TOKEN_SECRET`, `PORT`, `LOG_LEVEL=info`, and `NODE_ENV=production` through the platform's secret/configuration system.
-3. Run `yarn prisma migrate deploy` from CI or a release job that installs development dependencies.
-4. Start the image with its default `node dist/index.js` command.
+3. The default container command applies committed migrations with `yarn db:migrate-prod`, then starts the API with `yarn start`.
+4. For multi-replica deployments, run migrations once in a CI/release job and start replicas with `yarn start` so migrations do not race.
 5. Terminate HTTPS at the platform load balancer or ingress.
 6. Use the existing `/health` endpoint for automated container or platform health checks.
-7. Send logs to the platform's log system and do not expose Adminer publicly.
+7. Send logs to the platform's log system.
 
 Build the production image locally:
 
 ```bash
-docker build --target production -t nus-express-api .
+docker build -f Dockerfile.prod -t nus-express-api .
 ```
 
 Run it against an accessible PostgreSQL instance:
@@ -456,4 +495,4 @@ docker run --rm \
   nus-express-api
 ```
 
-The slim production image does not include the Prisma CLI and does not automatically run migrations. Keep schema changes in a separate CI/release step so migration failures do not race across multiple API replicas.
+The production image includes the Prisma CLI and applies committed migrations before starting the API. For deployments with multiple replicas, use a separate migration job and override the container startup command with `yarn start`.
