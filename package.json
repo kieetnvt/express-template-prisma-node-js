@@ -1,12 +1,16 @@
 {
   "name": "nus-express-template",
   "version": "0.0.0",
-  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --build --clean && tsc",
+    "build": "yarn db:generate && tsc --build --clean && tsc && tsc-alias",
     "lint": "eslint src/**/*.ts",
-    "start": "yarn lint && yarn build && yarn dev",
-    "dev": "tsx watch src/index.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "ci:check": "tsc --noEmit && eslint src/**/*.ts",
+    "dev": "yarn db:generate && tsx watch src/index.ts",
     "db:generate": "prisma generate",
     "db:migrate": "npx prisma migrate dev",
     "db:migrate-prod": "npx prisma migrate deploy",
@@ -27,6 +31,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcryptjs": "^2.4.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
@@ -35,12 +40,23 @@
     "@types/node": "^22.20.0",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.62.0",
-    "eslint": "^10.5.0",
+    "eslint": "^10.8.0",
     "nodemon": "^2.0.16",
     "prisma": "^7.8.0",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.9.1",
     "tsx": "^4.22.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.65.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma"
   }
 }

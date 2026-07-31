@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import UserService from '../services/user.service.js';
-import { successResponse } from '../routes/response.js';
+import UserService from '@/api/services/user.service';
+import { successResponse } from '@/api/routes/response';
 
 const getOne = async (req: Request, res: Response) => {
   const { id } = req.params;

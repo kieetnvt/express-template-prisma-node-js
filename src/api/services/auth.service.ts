@@ -1,9 +1,9 @@
-import { Prisma, User } from '../../generated/prisma/client.js';
+import { Prisma, User } from '@/generated/prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-import UserRepository from '../../prisma/repositories/user.repository.js';
-import { env } from '../../config/enviroment.js';
+import UserRepository from '@/prisma/repositories/user.repository';
+import { env } from '@/config/enviroment';
 
 const SALT_ROUND = 10;
 const TOKEN_EXPIRATION = 60 * 60 * 24;

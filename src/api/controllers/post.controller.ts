@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import PostService from '../services/post.service.js';
-import { successResponse } from '../routes/response.js';
+import PostService from '@/api/services/post.service';
+import { successResponse } from '@/api/routes/response';
 
 const getUserPosts = async (req: Request, res: Response) => {
   const posts = await PostService.getUserPosts(req.userId!);

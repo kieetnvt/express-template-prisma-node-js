@@ -1,4 +1,4 @@
-import CommentRepository from '../../prisma/repositories/comment.repository.js';
+import CommentRepository from '@/prisma/repositories/comment.repository';
 
 const getUserComments = async (userId: number) => {
   return CommentRepository.getUserComments(userId);

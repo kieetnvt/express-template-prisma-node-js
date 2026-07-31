@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { env } from '../../config/enviroment.js';
-import { AppError } from '../errors/app.error.js';
+import { env } from '@/config/enviroment';
+import { AppError } from '@/api/errors/app.error';
 
 interface MJwtPayload {
   id: number;
