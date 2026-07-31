@@ -12,7 +12,10 @@
     "rootDir": "./src",
     "sourceMap": true,
     "outDir": "dist",
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src"
@@ -20,5 +23,9 @@
   "exclude": [
     "node_modules"
   ],
-  "files": ["src/custom.d.ts"]
+  "files": ["src/custom.d.ts"],
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "resolveFullExtension": ".js"
+  }
 }
