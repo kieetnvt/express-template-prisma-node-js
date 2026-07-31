@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import CommentService from '../services/comment.service.js';
-import { successResponse } from '../routes/response.js';
+import CommentService from '@/api/services/comment.service';
+import { successResponse } from '@/api/routes/response';
 
 const getUserComments = async (req: Request, res: Response) => {
   const comments = await CommentService.getUserComments(req.userId!);

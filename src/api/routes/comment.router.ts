@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import CommentController from '../controllers/comment.controller.js';
-import { auth } from '../middlewares/auth.middleware.js';
-import { asyncHandler } from '../middlewares/async-handler.middleware.js';
-import { validateBody } from '../middlewares/validation.middleware.js';
-import { createCommentSchema } from './validators/comment.validator.js';
+import CommentController from '@/api/controllers/comment.controller';
+import { auth } from '@/api/middlewares/auth.middleware';
+import { asyncHandler } from '@/api/middlewares/async-handler.middleware';
+import { validateBody } from '@/api/middlewares/validation.middleware';
+import { createCommentSchema } from '@/api/routes/validators/comment.validator';
 
 const router = Router();
 

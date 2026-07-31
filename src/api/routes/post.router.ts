@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import PostController from '../controllers/post.controller.js';
-import { auth } from '../middlewares/auth.middleware.js';
-import { asyncHandler } from '../middlewares/async-handler.middleware.js';
-import { validateBody } from '../middlewares/validation.middleware.js';
-import { createPostSchema } from './validators/post.validator.js';
+import PostController from '@/api/controllers/post.controller';
+import { auth } from '@/api/middlewares/auth.middleware';
+import { asyncHandler } from '@/api/middlewares/async-handler.middleware';
+import { validateBody } from '@/api/middlewares/validation.middleware';
+import { createPostSchema } from '@/api/routes/validators/post.validator';
 
 const router = Router();
 

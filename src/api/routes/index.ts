@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import UserRouter from './user.router.js';
-import AuthRouter from './auth.router.js';
-import PostRouter from './post.router.js';
-import CommentRouter from './comment.router.js';
+import UserRouter from '@/api/routes/user.router';
+import AuthRouter from '@/api/routes/auth.router';
+import PostRouter from '@/api/routes/post.router';
+import CommentRouter from '@/api/routes/comment.router';
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import PostRepository from '../../prisma/repositories/post.repository.js';
+import PostRepository from '@/prisma/repositories/post.repository';
 
 const getUserPosts = async (userId: number) => {
   return PostRepository.getUserPosts(userId);

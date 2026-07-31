@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import AuthService from '../services/auth.service.js';
-import { successResponse } from '../routes/response.js';
+import AuthService from '@/api/services/auth.service';
+import { successResponse } from '@/api/routes/response';
 
 const signUp = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;

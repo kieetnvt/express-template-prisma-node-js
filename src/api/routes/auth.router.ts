@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import AuthController from '../controllers/auth.controller.js';
-import { asyncHandler } from '../middlewares/async-handler.middleware.js';
-import { validateBody } from '../middlewares/validation.middleware.js';
-import { loginSchema, signUpSchema } from './validators/auth.validator.js';
+import AuthController from '@/api/controllers/auth.controller';
+import { asyncHandler } from '@/api/middlewares/async-handler.middleware';
+import { validateBody } from '@/api/middlewares/validation.middleware';
+import { loginSchema, signUpSchema } from '@/api/routes/validators/auth.validator';
 
 const router = Router();
 

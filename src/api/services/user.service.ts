@@ -1,4 +1,4 @@
-import UserRepository from '../../prisma/repositories/user.repository.js';
+import UserRepository from '@/prisma/repositories/user.repository';
 
 const getOne = async (id: number) => {
   return UserRepository.findOne(id);
